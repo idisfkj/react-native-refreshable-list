@@ -1,9 +1,8 @@
-import RefreshableList from './list/RefreshableList';
-import RCTRefreshList from './list/RCTRefreshList';
-import RCTFooterState from './list/state/RCTFooterState';
+import RefreshableList from './src/list/RefreshableList';
+import RCTRefreshList from './src/list/RCTRefreshList';
+import RCTFooterState from './src/list/state/RCTFooterState'
 
 module.exports = {
     RefreshableList,
-    RCTRefreshList,
-    RCTFooterState
+    RCTRefreshList
 }
