@@ -4,5 +4,6 @@ import RCTFooterState from './src/list/state/RCTFooterState'
 
 module.exports = {
     RefreshableList,
-    RCTRefreshList
+    RCTRefreshList,
+    RCTFooterState
 }

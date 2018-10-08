@@ -81,7 +81,7 @@ export default class RCTHeaderView extends Component {
                         {opacity: this.opacity,
                         transform: [{scale: this.scale}]}
                         ]}
-                        source={require('../../../res/image/icy_default_loading.png')}/>
+                        source={require('../image/icy_default_loading.png')}/>
                 </View>
             )
         }
