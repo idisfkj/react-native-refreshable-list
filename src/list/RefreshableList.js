@@ -29,6 +29,7 @@ export default class RefreshableFlatList extends Component {
         };
         this.headerHeight = 0;
         this.releaseInertiaPosition = 0;
+        this.releaseInertiaStart = false;
         this.headerHeightOffset = 0;
         this.offsetY = 0;
 
@@ -49,7 +50,10 @@ export default class RefreshableFlatList extends Component {
 
         this.scrollPan = new Animated.ValueXY({x: 0, y: 0});
         this.scrollPan.addListener((value) => {
-            if (value.y != 0 && value.y / 2 > this.releaseInertiaPosition&&
+            if (!this.releaseInertiaStart && value.y == this.releaseInertiaPosition) {
+                this.releaseInertiaStart = true;
+            }
+            if (value.y != 0 && this.releaseInertiaStart &&
                 ((value.y > 0 && this.releaseInertiaPosition > 0) || (value.y < 0 && this.releaseInertiaPosition < 0))) {
                 this._scrollTo(-value.y)
                 this.releaseInertiaPosition = value.y;
@@ -168,6 +172,7 @@ export default class RefreshableFlatList extends Component {
     }
 
     _inertiaRelease(dx, dy, vx, vy) {
+        this.releaseInertiaStart = false;
         this.releaseInertiaPosition = dy;
         this.scrollPan.setValue({x: dx, y: dy});
         Animated.decay(this.scrollPan, {
@@ -294,6 +299,11 @@ export default class RefreshableFlatList extends Component {
                 isRefreshing: false
             }, () => this._onPullStateChange());
         }
+    }
+
+    componentWiiUnmount() {
+        this.scrollPan.removeAllListeners();
+        this.pullPan.removeAllListeners();
     }
 
 }

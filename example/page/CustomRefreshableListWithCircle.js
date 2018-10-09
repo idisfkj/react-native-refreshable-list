@@ -38,7 +38,7 @@ export default class CustomRefreshableListWithCircle extends React.Component {
 
     _renderItem(info) {
         return (
-            <Text style={styles.text}>{info.item}</Text>
+            <ItemComponent content={info.item}/>
         );
     }
 
@@ -71,6 +71,17 @@ export default class CustomRefreshableListWithCircle extends React.Component {
                 data: this.state.data.concat(data)
             }, () => this.list.loadCompleted(RCTFooterState.CanLoaded));
         }, 3000);
+    }
+}
+
+class ItemComponent extends React.PureComponent {
+    constructor(props){
+        super(props);
+    }
+    render() {
+        return(
+            <Text style={styles.text}>{this.props.content}</Text>
+        );
     }
 }
 

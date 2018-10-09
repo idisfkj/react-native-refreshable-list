@@ -12,64 +12,64 @@ npm install --save react-native-refreshable-list
 # Quick Start
 
 ```
-    import {RCTRefreshList, RCTFooterState} from 'react-native-refreshable-list';
-    ....
-    ....
+import {RCTRefreshList, RCTFooterState} from 'react-native-refreshable-list';
+....
+....
 
-    render() {
-        return(
-            <RCTRefreshList
-                style={styles.container}
-                ref={(ref) => this.list = ref}
-                type={'flatList'}
-                data={this.state.data}
-                renderItem={this._renderItem}
-                ItemSeparatorComponent={this._renderSeparatorComponent}
-                pullRefresh={() => this._pullRefresh()}
-                loadMore={() => this._loadMore()}
-                keyExtractor={(item, index) => index.toString()}/>
-        );
+render() {
+    return(
+        <RCTRefreshList
+            style={styles.container}
+            ref={(ref) => this.list = ref}
+            type={'flatList'}
+            data={this.state.data}
+            renderItem={this._renderItem}
+            ItemSeparatorComponent={this._renderSeparatorComponent}
+            pullRefresh={() => this._pullRefresh()}
+            loadMore={() => this._loadMore()}
+            keyExtractor={(item, index) => index.toString()}/>
+    );
+}
+
+_renderItem(info) {
+    return (
+        <Text style={styles.text}>{info.item}</Text>
+    );
+}
+
+_renderSeparatorComponent() {
+    return(
+        <View style={styles.line}></View>
+    );
+}
+
+_pullRefresh() {
+    var data = [];
+    for(var i = 0; i < 20; i++) {
+        data.push('item' + i);
     }
+    setTimeout(() => {
+        this.setState({
+            data
+        }, () => this.list.loadCompleted());
+    }, 1500);
+}
 
-    _renderItem(info) {
-        return (
-            <Text style={styles.text}>{info.item}</Text>
-        );
+_loadMore() {
+    var data = [];
+    var size = this.state.data.length;
+    for(var i = size; i < size + 20; i++){
+        data.push('item' + i);
     }
+    setTimeout(() => {
+        this.setState({
+            data: this.state.data.concat(data)
+        }, () => this.list.loadCompleted(RCTFooterState.CanLoaded));
+    }, 3000);
+}
 
-    _renderSeparatorComponent() {
-        return(
-            <View style={styles.line}></View>
-        );
-    }
-
-    _pullRefresh() {
-        var data = [];
-        for(var i = 0; i < 20; i++) {
-            data.push('item' + i);
-        }
-        setTimeout(() => {
-            this.setState({
-                data
-            }, () => this.list.loadCompleted());
-        }, 1500);
-    }
-
-    _loadMore() {
-        var data = [];
-        var size = this.state.data.length;
-        for(var i = size; i < size + 20; i++){
-            data.push('item' + i);
-        }
-        setTimeout(() => {
-            this.setState({
-                data: this.state.data.concat(data)
-            }, () => this.list.loadCompleted(RCTFooterState.CanLoaded));
-        }, 3000);
-    }
-
-    ....
-    ....
+....
+....
 ```
 
 # Feature
