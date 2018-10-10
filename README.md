@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
 * type: List types, optional values for `flatList` with `sectionList`.
 * pullBoundary: The minimum distance trigger refresh. The default value of `80`.
 * headerBackgroundColor: Set backgroundColor of headerView. The default value of `white`.
-* factor: The drop-down resistance factors. The default value of `10`, Value must be greater than 10.
+* factor: The drop-down resistance factors. The default value of `10`, Value must be greater than `0`.
 * pullRefresh: List refreshing callback.
 * loadMore: List loadMore callback.
 
