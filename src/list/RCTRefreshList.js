@@ -30,8 +30,6 @@ export default class RCTRefreshList extends Component {
             <RefreshableList
                 {...this.props}
                 ref={(ref) => this.list = ref}
-                pullBoundary={80}
-                headerBackgroudColor={'#f5f5f5'}
                 onPullStateChange={this._onPullStateChange}
                 renderHeaderComponent={() => this._renderHeaderComponent()}
                 onEndReached={() => this._shouldLoadMore()}

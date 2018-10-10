@@ -160,6 +160,13 @@ export default class CustomHeaderView extends Component {
             }
         });
     }
+
+    componentWillUnmount() {
+        clearTimeout(this.loadingTimeout);
+        clearTimeout(this.inTimeout);
+        clearTimeout(this.outTimeout);
+        this.arcPan.removeAllListeners();
+    }
 }
 
 const styles = StyleSheet.create({

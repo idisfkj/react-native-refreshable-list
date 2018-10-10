@@ -1,13 +1,15 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import {RCTRefreshList, RCTFooterState} from 'react-native-refreshable-list';
+import CustomRefreshList from './component/CustomRefreshList';
+import {RCTFooterState} from 'react-native-refreshable-list';
 
 export default class CustomRefreshListPage extends React.Component {
 
     constructor(props){
         super(props);
         this.state = {
-            data: []
+            data: [],
+            count: 0
         };
     }
 
@@ -23,7 +25,7 @@ export default class CustomRefreshListPage extends React.Component {
 
     render() {
         return(
-            <RCTRefreshList
+            <CustomRefreshList
                 style={styles.container}
                 ref={(ref) => this.list = ref}
                 type={'flatList'}
@@ -53,24 +55,35 @@ export default class CustomRefreshListPage extends React.Component {
         for(var i = 0; i < 20; i++) {
             data.push('item' + i);
         }
-        setTimeout(() => {
+        this._pullTimeout = setTimeout(() => {
             this.setState({
-                data
+                data,
+                count: 0
             }, () => this.list.loadCompleted());
         }, 1500);
     }
 
     _loadMore() {
-        var data = [];
-        var size = this.state.data.length;
-        for(var i = size; i < size + 20; i++){
-            data.push('item' + i);
+        if (this.state.count < 1) {
+            var data = [];
+            var size = this.state.data.length;
+            for(var i = size; i < size + 20; i++){
+                data.push('item' + i);
+            }
+            this._loadTimeout = setTimeout(() => {
+                this.setState({
+                    data: this.state.data.concat(data),
+                    count: this.state.count + 1
+                }, () => this.list.loadCompleted(RCTFooterState.CanLoaded));
+            }, 3000);
+        } else {
+            this.list.loadCompleted(RCTFooterState.NoMore);
         }
-        setTimeout(() => {
-            this.setState({
-                data: this.state.data.concat(data)
-            }, () => this.list.loadCompleted(RCTFooterState.CanLoaded));
-        }, 3000);
+    }
+
+    componentWillUnmount() {
+        clearTimeout(this._pullTimeout);
+        clearTimeout(this._loadTimeout);
     }
 }
 
@@ -93,7 +106,7 @@ const styles = StyleSheet.create({
       fontSize: 18,
       color: '#333',
       textAlign: 'center',
-      paddingVertical: 15
+      paddingVertical: 25
     },
     line: {
       width: '100%',

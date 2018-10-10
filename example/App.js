@@ -11,8 +11,8 @@ class Main extends React.Component {
         <FlatList
             style={styles.container}
             data={[
-                'custom refreshable list with circle',
-                'custom refreshable list with arrow',
+                'common refreshable list',
+                'custom refreshable list',
              ]}
             renderItem={(info) => this._renderItem(info, navigate)}
             ItemSeparatorComponent={this._renderSeparatorComponent}

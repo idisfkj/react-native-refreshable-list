@@ -196,7 +196,7 @@ export default class RefreshableFlatList extends Component {
         renderHeaderComponent: PropTypes.func,
         pullBoundary: PropTypes.number,
         factor: PropTypes.number,
-        headerBackgroudColor: PropTypes.string,
+        headerBackgroundColor: PropTypes.string,
         type: PropTypes.oneOf(['flatList', 'sectionList'])
     }
 
@@ -206,7 +206,7 @@ export default class RefreshableFlatList extends Component {
         renderHeaderComponent: () => {},
         pullBoundary: px2dp(80),
         factor: 10,
-        headerBackgroudColor: 'white',
+        headerBackgroundColor: 'white',
         type: 'flatList'
     }
 
@@ -251,7 +251,7 @@ export default class RefreshableFlatList extends Component {
             <View
                 ref={(ref) => this.headerView = ref}
                 style={{width: this.state.headerWidth, height: this.headerHeight,
-                backgroundColor: this.props.headerBackgroudColor, alignItems: 'center'}}>
+                backgroundColor: this.props.headerBackgroundColor, alignItems: 'center'}}>
                 {this.props.renderHeaderComponent()}
             </View>
         );
@@ -302,7 +302,7 @@ export default class RefreshableFlatList extends Component {
         }
     }
 
-    componentWiiUnmount() {
+    componentWillUnmount() {
         this.scrollPan.removeAllListeners();
         this.pullPan.removeAllListeners();
     }

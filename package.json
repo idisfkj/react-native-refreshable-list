@@ -1,6 +1,6 @@
 {
   "name": "react-native-refreshable-list",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "the best Refreshable List component for React Native.",
   "main": "index.js",
   "scripts": {

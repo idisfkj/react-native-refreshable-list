@@ -90,7 +90,7 @@ export default class RCTHeaderView extends Component {
         }).start();
     }
 
-    componentWiiUnmount() {
+    componentWillUnmount() {
         this.rotatePan.removeAllListeners();
     }
 }

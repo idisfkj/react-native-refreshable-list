@@ -1,7 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import CustomRefreshList from './component/CustomRefreshList';
-import {RCTFooterState} from 'react-native-refreshable-list';
+import {RCTRefreshList, RCTFooterState} from 'react-native-refreshable-list';
 
 export default class CommonRefreshListPage extends React.Component {
 
@@ -25,10 +24,13 @@ export default class CommonRefreshListPage extends React.Component {
 
     render() {
         return(
-            <CustomRefreshList
+            <RCTRefreshList
                 style={styles.container}
                 ref={(ref) => this.list = ref}
                 type={'flatList'}
+                pullBoundary={80}
+                headerBackgroundColor={'#f5f5f5'}
+                factor={10}
                 data={this.state.data}
                 renderItem={this._renderItem}
                 ItemSeparatorComponent={this._renderSeparatorComponent}
@@ -55,7 +57,8 @@ export default class CommonRefreshListPage extends React.Component {
         for(var i = 0; i < 20; i++) {
             data.push('item' + i);
         }
-        setTimeout(() => {
+        this._pullTimeout = setTimeout(() => {
+            console.log("setTimeout");
             this.setState({
                 data,
                 count: 0
@@ -70,7 +73,7 @@ export default class CommonRefreshListPage extends React.Component {
             for(var i = size; i < size + 20; i++){
                 data.push('item' + i);
             }
-            setTimeout(() => {
+            this._loadTimeout = setTimeout(() => {
                 this.setState({
                     data: this.state.data.concat(data),
                     count: this.state.count + 1
@@ -79,6 +82,11 @@ export default class CommonRefreshListPage extends React.Component {
         } else {
             this.list.loadCompleted(RCTFooterState.NoMore);
         }
+    }
+
+    componentWillUnmount() {
+        clearTimeout(this._pullTimeout);
+        clearTimeout(this._loadTimeout);
     }
 }
 
