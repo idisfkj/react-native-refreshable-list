@@ -1,23 +1,21 @@
 import React, {Component} from 'react';
-import {View, StyleSheet} from 'react-native';
-import CommonHeaderView from './RCTHeaderView';
-import CommonFooterView from './RCTFooterView';
-import RefreshableList from './RefreshableList';
-import RCTHeaderState from './state/RCTHeaderState';
-import RCTFooterState from './state/RCTFooterState';
+import CustomHeaderView from './CustomHeaderView';
+import CustomFooterView from './CustomFooterView';
+import {RCTHeaderState, RCTFooterState, RefreshableList} from 'react-native-refreshable-list';
 import PropTypes from 'prop-types';
 
-export default class RCTRefreshList extends Component {
+export default class CustomRefreshList extends Component {
 
     constructor(props){
         super(props);
+        this._renderHeaderComponent = this._renderHeaderComponent.bind(this);
         this.state = {
             isRefreshing: false,
-            headerHeight: 0,
             footerState: RCTFooterState.CanLoaded,
             loadMoreCompleted: true,
-            showContent: true
-        }
+            headerHeight: 0,
+            showLine: true
+        };
     }
 
     static propTypes = {
@@ -25,45 +23,45 @@ export default class RCTRefreshList extends Component {
         loadMore: PropTypes.func
     }
 
-    render()  {
+    render() {
         return(
             <RefreshableList
                 {...this.props}
                 ref={(ref) => this.list = ref}
-                pullBoundary={80}
-                headerBackgroudColor={'#f5f5f5'}
                 onPullStateChange={this._onPullStateChange}
                 renderHeaderComponent={() => this._renderHeaderComponent()}
                 onEndReached={() => this._shouldLoadMore()}
                 onEndReachedThreshold={0.1}
-                ListFooterComponent={() => this._renderFooterComponent()}/>
+                ListFooterComponent={() => this._renderFooterView()}/>
         );
     }
 
     _onPullStateChange = ({pullState, isRefreshing, offset}) => {
         this.setState({
-            showContent: pullState != RCTHeaderState.RELEASING,
-            headerHeight: offset,
-            isRefreshing
+            showLine: pullState === RCTHeaderState.PULLING || pullState === RCTHeaderState.IDLE,
+            isRefreshing,
+            headerHeight: offset
         });
+        if (pullState === RCTHeaderState.LOADING) {
+            this.headerView.startPullingAniamted();
+        }
     }
 
     _renderHeaderComponent() {
         return(
-            <CommonHeaderView
+            <CustomHeaderView
                 ref={(ref) => this.headerView = ref}
-                showContent={this.state.showContent}
-                headerHeight={this.state.headerHeight}
+                showLine={this.state.showLine}
                 isRefreshing={this.state.isRefreshing}
-                isReleaseRefresh={this.state.headerHeight >= 80}/>
+                headerHeight={this.state.headerHeight}/>
         );
     }
 
-    _renderFooterComponent() {
+    _renderFooterView() {
         return(
-            <CommonFooterView
+            <CustomFooterView
                 state={this.state.footerState}
-                onReload={this._shouldLoadMore}/>
+                onReload={() => this._shouldLoadMore()}/>
         );
     }
 
@@ -91,4 +89,5 @@ export default class RCTRefreshList extends Component {
             footerState: state
         });
     }
+
 }

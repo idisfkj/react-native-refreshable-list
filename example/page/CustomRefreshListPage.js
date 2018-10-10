@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {RCTRefreshList, RCTFooterState} from 'react-native-refreshable-list';
 
-export default class CustomRefreshableListWithCircle extends React.Component {
+export default class CustomRefreshListPage extends React.Component {
 
     constructor(props){
         super(props);

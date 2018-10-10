@@ -41,6 +41,7 @@ export default class RefreshableFlatList extends Component {
                 });
             }
             this.headerHeight = value.y;
+            this._onPullStateChange();
             this.headerView.setNativeProps({
                 style: {
                     height: this.headerHeight

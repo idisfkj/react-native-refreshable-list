@@ -1,40 +1,39 @@
 import React, {Component} from 'react';
 import {View, Text, ActivityIndicator, StyleSheet, TouchableWithoutFeedback} from 'react-native';
-import FooterState from './state/RCTFooterState';
+import {RCTFooterState} from 'react-native-refreshable-list';
 import PropTypes from 'prop-types';
 import UIUtils from '../utils/UIUtils';
 
 const {px2dp, onePixel} = UIUtils;
 
-export default class RCTFooterView extends Component {
+export default class CustomFooterView extends Component {
 
     static propTypes = {
         onReload: PropTypes.func
     }
 
     static defaultProps = {
-        pullLoad: 'pull up load',
-        loading: 'loading ...',
-        noMoreData: 'no more data',
-        loadFailure: 'loadFailure'
+        canLoadedContent: '上拉加载更多',
+        noMoreContent: 'THE END',
+        loadFailureContent: '加载失败，点击重试~'
     }
 
     render(){
         let footerView;
         switch (this.props.state) {
-            case FooterState.Hide:
+            case RCTFooterState.Hide:
                 footerView = <View/>
                 break;
-            case FooterState.Loading:
+            case RCTFooterState.Loading:
                 footerView = this._createLoadingView();
                 break;
-            case FooterState.CanLoaded:
+            case RCTFooterState.CanLoaded:
                 footerView = this._createCanLoadedView();
                 break;
-            case FooterState.NoMore:
+            case RCTFooterState.NoMore:
                 footerView = this._createNoMoreView();
                 break;
-            case FooterState.LoadFailure:
+            case RCTFooterState.LoadFailure:
                 footerView = this._createLoadFailure();
                 break;
             default:
@@ -47,7 +46,6 @@ export default class RCTFooterView extends Component {
         return(
             <View style={styles.container}>
                 <ActivityIndicator size="small" color="#aaaaaa" opacity={0.5}/>
-                <Text style={styles.footerContent}>{this.props.loading}</Text>
             </View>
         );
     }
@@ -55,7 +53,7 @@ export default class RCTFooterView extends Component {
     _createCanLoadedView() {
         return (
             <View style={styles.container}>
-                <Text style={styles.footerContent}>{this.props.pullLoad}</Text>
+                <Text style={styles.footerContent}>{this.props.canLoadedContent}</Text>
             </View>
         );
     }
@@ -63,7 +61,9 @@ export default class RCTFooterView extends Component {
     _createNoMoreView() {
         return (
             <View style={styles.container}>
-                <Text style={styles.footerContent}>{this.props.noMoreData}</Text>
+                <View style={styles.lineView} marginRight={px2dp(14)}/>
+                <Text style={styles.footerContent}>{this.props.noMoreContent}</Text>
+                <View style={styles.lineView} marginLeft={px2dp(14)}/>
             </View>
         );
     }
@@ -90,9 +90,12 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     footerContent: {
-        width: px2dp(150),
-        textAlign: 'center',
-        fontSize: 18,
-        color: 'gray'
+        fontSize: 11,
+        color: '#999'
+    },
+    lineView: {
+        width: px2dp(35),
+        height: onePixel,
+        backgroundColor: '#999'
     }
 });

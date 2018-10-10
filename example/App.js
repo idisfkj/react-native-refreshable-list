@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity , FlatList} from 'react-native';
 import {createStackNavigator} from 'react-navigation';
-import CustomRefreshableListWithCircle from './page/CustomRefreshableListWithCircle';
+import CustomRefreshListPage from './page/CustomRefreshListPage';
+import CommonRefreshListPage from './page/CommonRefreshListPage';
 
 class Main extends React.Component {
   render() {
@@ -30,10 +31,13 @@ class Main extends React.Component {
   _navigate(index, navigate) {
       switch (index) {
           case 0:
-              navigate('CustomRefreshableListWithCircle')
+              navigate('CommonRefreshListPage');
+              break;
+          case 1:
+              navigate('CustomRefreshListPage');
               break;
           default:
-              navigate('CustomRefreshableListWithCircle')
+              navigate('CommonRefreshListPage');
       }
   }
 
@@ -47,7 +51,8 @@ class Main extends React.Component {
 const RootStack = createStackNavigator(
     {
         Main: Main,
-        CustomRefreshableListWithCircle: CustomRefreshableListWithCircle
+        CommonRefreshListPage: CommonRefreshListPage,
+        CustomRefreshListPage: CustomRefreshListPage,
     },
     {
         initialRouteName: 'Main',
