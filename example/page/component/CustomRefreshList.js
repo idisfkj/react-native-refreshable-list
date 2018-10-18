@@ -30,8 +30,10 @@ export default class CustomRefreshList extends Component {
                 ref={(ref) => this.list = ref}
                 onPullStateChange={this._onPullStateChange}
                 renderHeaderComponent={() => this._renderHeaderComponent()}
+                pullRefresh={() => this._pullRefresh()}
                 onEndReached={() => this._shouldLoadMore()}
                 onEndReachedThreshold={0.1}
+                footerState={this.state.footerState}
                 ListFooterComponent={() => this._renderFooterView()}/>
         );
     }
@@ -63,6 +65,12 @@ export default class CustomRefreshList extends Component {
                 state={this.state.footerState}
                 onReload={() => this._shouldLoadMore()}/>
         );
+    }
+
+    _pullRefresh() {
+        this.setState({
+            footerState: RCTFooterState.Hide
+        }, () => this.props.pullRefresh && this.props.pullRefresh());
     }
 
     _shouldLoadMore() {
