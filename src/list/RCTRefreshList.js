@@ -32,8 +32,10 @@ export default class RCTRefreshList extends Component {
                 ref={(ref) => this.list = ref}
                 onPullStateChange={this._onPullStateChange}
                 renderHeaderComponent={() => this._renderHeaderComponent()}
+                pullRefresh={() => this._pullRefresh()}
                 onEndReached={() => this._shouldLoadMore()}
                 onEndReachedThreshold={0.1}
+                footerState={this.state.footerState}
                 ListFooterComponent={() => this._renderFooterComponent()}/>
         );
     }
@@ -65,12 +67,18 @@ export default class RCTRefreshList extends Component {
         );
     }
 
+    _pullRefresh() {
+        this.setState({
+            footerState: RCTFooterState.Hide
+        }, () => this.props.pullRefresh && this.props.pullRefresh());
+    }
+
     _shouldLoadMore() {
         if (!this.state.isRefreshing && this.state.loadMoreCompleted && this.state.footerState != RCTFooterState.NoMore) {
             this.setState({
                 loadMoreCompleted: false,
                 footerState: RCTFooterState.Loading
-            }, () => this.props.loadMore());
+            }, () => this.props.loadMore && this.props.loadMore());
         }
     }
 

@@ -9,15 +9,14 @@ import PropTypes from 'prop-types';
 
 const {px2dp, width, onePixel, height} = UIUtils;
 const {Surface, Shape, Path} = ART;
-const isPullDown = (x, y) => y > 0 && y > Math.abs(x);
-const isPullUp = (x, y) => y < 0 && Math.abs(y) > Math.abs(x);
+const isPullDown = (x, y) => y > 0;
+const isPullUp = (x, y) => y < 0;
 const isVerticalGesture = (x, y) => Math.abs(y) > Math.abs(x);
 
 export default class RefreshableFlatList extends Component {
 
     constructor(props){
         super(props);
-        this._renderHeaderComponent = this._renderHeaderComponent.bind(this);
         this.state = {
             isRefreshing: false,
             pullState: RCTHeaderState.IDLE,
@@ -32,6 +31,7 @@ export default class RefreshableFlatList extends Component {
         this.releaseInertiaStart = false;
         this.headerHeightOffset = 0;
         this.offsetY = 0;
+        this.scrollOffsetY = 0;
 
         this.pullPan = new Animated.ValueXY({x: 0, y: 0});
         this.pullPan.addListener((value) => {
@@ -56,20 +56,20 @@ export default class RefreshableFlatList extends Component {
             }
             if (value.y != 0 && this.releaseInertiaStart &&
                 ((value.y > 0 && this.releaseInertiaPosition > 0) || (value.y < 0 && this.releaseInertiaPosition < 0))) {
-                this._scrollTo(-value.y)
+                this._scrollTo(-value.y + this.scrollOffsetY)
                 this.releaseInertiaPosition = value.y;
             }
         });
 
         this._panResponder = PanResponder.create({
-        onStartShouldSetPanResponderCapture: this._onStartShouldSetPanResponderCapture,
-        onStartShouldSetPanResponder: this._shouldSetPanResponder,
-        onMoveShouldSetPanResponder: this._shouldSetPanResponder,
-        onPanResponderGrant: (evt, gestureState) => {},
-        onPanResponderMove: this._panResponderMove,
-        onPanResponderTerminationRequest: (evt, gestureState) => true,
-        onPanResponderRelease: this._panResponderRelease
-      });
+            onStartShouldSetPanResponderCapture: this._onStartShouldSetPanResponderCapture,
+            onStartShouldSetPanResponder: this._shouldSetPanResponder,
+            onMoveShouldSetPanResponder: this._shouldSetPanResponder,
+            onPanResponderGrant: (evt, gestureState) => {},
+            onPanResponderMove: this._panResponderMove,
+            onPanResponderTerminationRequest: (evt, gestureState) => true,
+            onPanResponderRelease: this._panResponderRelease
+        });
     }
 
     _onStartShouldSetPanResponderCapture = () => {
@@ -78,8 +78,10 @@ export default class RefreshableFlatList extends Component {
     }
 
     _shouldSetPanResponder = (evt, gestureState) => {
-        if (!this.state.scrollEnabled) {
+        this.isVertical = false;
+        if (isVerticalGesture(gestureState.dx, gestureState.dy) && !this.state.scrollEnabled) {
             this.headerHeightOffset = this.headerHeight;
+            this.scrollOffsetY = this.offsetY;
             Animated.timing(this.pullPan).stop();
             return true;
         }
@@ -88,12 +90,17 @@ export default class RefreshableFlatList extends Component {
 
     _panResponderMove = (evt, gestureState) => {
         const contentOffset = this.state.contentHeight - this.state.listHeight;
-        if (isPullDown(gestureState.dx, gestureState.dy)) {
-            //判断是否有滑动偏移
-            this._movePullDown(gestureState.dx, gestureState.dy, contentOffset);
-        } else if (isPullUp(gestureState.dx, gestureState.dy)) {
-            //可以滑动&不处于下拉状态
-            this._movePullUp(gestureState.dx, gestureState.dy, contentOffset);
+        if (!this.isVertical) {
+            this.isVertical = isVerticalGesture(gestureState.dx, gestureState.dy);
+        }
+        if (this.isVertical) {
+            if (isPullDown(gestureState.dx, gestureState.dy)) {
+                //判断是否有滑动偏移
+                this._movePullDown(gestureState.dx, gestureState.dy, contentOffset);
+            } else if (isPullUp(gestureState.dx, gestureState.dy)) {
+                //可以滑动&不处于下拉状态
+                this._movePullUp(gestureState.dx, gestureState.dy, contentOffset);
+            }
         }
     }
 
@@ -116,9 +123,10 @@ export default class RefreshableFlatList extends Component {
 
     _movePullDown(dx, dy, contentOffset) {
         if (this.offsetY > 0 && contentOffset > 0) {
-            this._scrollTo(-dy)
+            this._scrollTo(-dy + this.scrollOffsetY);
             this.setState({
-                pullState: RCTHeaderState.IDLE
+                pullState: RCTHeaderState.IDLE,
+                scrollEnabled: true
             }, () => this._onPullStateChange());
         } else {
             this.headerHeight = (this.headerHeightOffset + dy <= this.props.pullBoundary ? (this.headerHeightOffset + dy) :
@@ -136,9 +144,10 @@ export default class RefreshableFlatList extends Component {
 
     _movePullUp(dx, dy, contentOffset) {
         if (contentOffset > 0 && this.headerHeight <= 0) {
-            this._scrollTo(-dy);
+            this._scrollTo(-dy + this.scrollOffsetY);
             this.setState({
-                pullState: RCTHeaderState.IDLE
+                pullState: RCTHeaderState.IDLE,
+                scrollEnabled: true
             }, () => this._onPullStateChange());
         } else if (this.headerHeight > 0) {
             this.headerHeight = (this.headerHeightOffset + dy <= this.props.pullBoundary ? (this.headerHeightOffset + dy) :
@@ -183,11 +192,12 @@ export default class RefreshableFlatList extends Component {
     }
 
     _scrollTo(dy) {
-        if (this.props.type === 'flatList') {
-            this.list.scrollToOffset({offset: dy});
-        } else {
-            this.list._wrapperListRef._listRef.scrollToOffset({offset: dy})
-        }
+        // this.list.scrollTo(dy);
+        // if (this.props.type === 'flatList') {
+        this.list.scrollToOffset({offset: dy});
+        // } else {
+            // this.list._wrapperListRef._listRef.scrollToOffset({offset: dy})
+        // }
     }
 
     static propTypes = {
@@ -215,35 +225,25 @@ export default class RefreshableFlatList extends Component {
             <View style={styles.container}
                 {...this._panResponder.panHandlers}>
                 {this._renderHeaderComponent()}
-                {this._renderList()}
+                <FlatList
+                    ref={(ref) => this.list = ref}
+                    scrollEnabled={this.state.scrollEnabled}
+                    data={['placeholder']}
+                    renderItem={(info) => this._renderItem(info)}
+                    onLayout={this._onLayout}
+                    onScroll={this._onScroll}
+                    onContentSizeChange={(w, h) => {this.setState({contentHeight: h});}}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={(item, index) => index.toString()}/>
             </View>
         );
     }
 
-    _renderList() {
-        if (this.props.type === 'flatList') {
-            return(
-                <FlatList
-                    {...this.props}
-                    ref={(ref) => {this.list = ref;}}
-                    scrollEnabled={this.state.scrollEnabled}
-                    onLayout={this._onLayout}
-                    onContentSizeChange={(w, h) => {this.setState({contentHeight: h});}}
-                    showsVerticalScrollIndicator={false}
-                    onScroll={this._onScroll}/>
-            )
-        } else {
-            return(
-                <SectionList
-                    {...this.props}
-                    ref={(ref) => {this.list = ref;}}
-                    scrollEnabled={this.state.scrollEnabled}
-                    onLayout={this._onLayout}
-                    onContentSizeChange={(w, h) => {this.setState({contentHeight: h});}}
-                    showsVerticalScrollIndicator={false}
-                    onScroll={this._onScroll}/>
-            )
-        }
+    _renderItem(info) {
+        return <ListComponent
+            {...this.props}
+            headerHeight={this.headerHeight}
+            pullState={this.state.pullState}/>
     }
 
     _renderHeaderComponent() {
@@ -266,9 +266,11 @@ export default class RefreshableFlatList extends Component {
 
     _onScroll = (e) => {
         this.offsetY = e.nativeEvent.contentOffset.y + e.nativeEvent.contentInset.top;
-        this.setState({
-            scrollEnabled: this.offsetY > 0
-        });
+        if (this.offsetY == 0) {
+            this.setState({
+                scrollEnabled: false
+            });
+        }
     }
 
     _pullRelease() {
@@ -293,9 +295,9 @@ export default class RefreshableFlatList extends Component {
 
     refreshCompleted(footerState: RCTFooterState) {
         if (this.state.isRefreshing) {
-        if (this.state.pullState != RCTHeaderState.PULLING) {
-            this._pullRelease();
-        }
+            if (this.state.pullState != RCTHeaderState.PULLING) {
+                this._pullRelease();
+            }
             this.setState({
                 isRefreshing: false
             }, () => this._onPullStateChange());
@@ -305,6 +307,40 @@ export default class RefreshableFlatList extends Component {
     componentWillUnmount() {
         this.scrollPan.removeAllListeners();
         this.pullPan.removeAllListeners();
+    }
+
+}
+
+class ListComponent extends Component {
+    render() {
+        if (this.props.type === 'flatList') {
+            return(
+                <FlatList
+                    {...this.props}
+                    ref={(ref) => this.list = ref}
+                    showsVerticalScrollIndicator={false}/>
+            )
+        } else {
+            return(
+                <SectionList
+                    {...this.props}
+                    ref={(ref) => this.list = ref}
+                    showsVerticalScrollIndicator={false}/>
+            )
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if(this.props.type == 'flatList' && this.props.data != nextProps.data) {
+            return true;
+        }
+        if(this.props.type == 'sectionList' && this.props.sections !=  nextProps.sections) {
+            return true;
+        }
+        if (this.props.footerState != nextProps.footerState) {
+            return true;
+        }
+        return false;
     }
 
 }
